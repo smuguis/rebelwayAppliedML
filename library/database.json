@@ -1,0 +1,23 @@
+{
+	"Books": {
+		"ASLDJA": {
+			"title":"La Sombra",
+			"author":"Eric Mes", 
+			"genre":"Mistery", 
+			"price":"20.99"
+		},
+		"FTRGSH": {
+			"title":"Great Shot",
+			"author":"Greta Thorn",
+			"genre":"Drama",
+			"price":"25.25"
+		},
+		"FNSUTY": {
+			"title":"Hey You",
+			"author":"Anna Dern",
+			"genre":"Comedy",
+			"price":"45"
+		}
+
+	}
+}

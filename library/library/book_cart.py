@@ -1,3 +1,6 @@
+
+
+
 import json
 from dataclasses import dataclass, field
 from library.books import Book
@@ -25,7 +28,7 @@ class Books_Cart:
 
         data_file = Fstream.load_json_file(self.database_path)
 
-        if len(data_file.books())>0:
+        if len(data_file.items())>0:
             self.isEmpty = False
             self.isActive = True
 
@@ -57,4 +60,71 @@ class Books_Cart:
                 print(f"Found: {book.title} {book.author} {book.genre} ${book._price}")
 
         return matching_items
+
+    def borrow_books_by_query(self, query:str):
+        """
+        remove book by name from user
+        """
+        data = Fstream.load_json_file(self.database_path)
+        books_to_remove = []
+
+        for books_id, books_data in data["Books"].items():
+            if query.lower() in books_data["title"].lower():
+                books_to_remove.append(books_id)
+
+        if not books_to_remove:
+            print(f"no books mathing '{query}'")
+            return
+
+        for books_id in books_to_remove:
+            book_name = data["Books"][books_id]["title"]
+            del data["Books"][books_id]
+            print(f"Book '{book_name}' has been borrowed from the library")
+        with open(self.database_path, "w") as file:
+            json.dump(data, file, indent=4)
+        if not data["Books"]:
+            self.isEmpty = True
+            self.isActive = False
+
+    def retrieve_books(self, book:Book):
+        """
+        retrieve book from user
+        """
+        data = self.get_all_books()
+
+        new_book = {
+            "title": book.title,
+            "author": book.author,
+            "genre": book.genre,
+            "price": book._price,
+            "id": book.id
+        }
+
+        data["Books"][book.id] = new_book
+        with open(self.database_path, "w") as file:
+            json.dump(data, file, indent=4)
+        self.isEmpty = False
+        self.isActive = True
+
+        print(f"Book '{book.title}' has been retrieved to the library")
+
+    def empty_book_cart(self):
+        """
+        empty book cart
+        """
+        data = self.get_all_books()
+        if len(data["Books"]) > 0:
+            data = {"Books":{}}
+            with open(self.database_path, "w") as file:
+                json.dump(data, file, indent=4)
+            
+            if not data["Books"]:
+                self.isEmpty = True
+                self.isActive = False
+
+        print("Book cart is empty")
+
+        
+                                        
+
 

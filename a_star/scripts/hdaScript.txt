@@ -1,0 +1,116 @@
+import hou
+import math
+import sys
+import pickle
+
+sys.path.append(r"D:\development\rebelwayAppliedML\rebelwayAppliedML\a_star\scripts")
+   
+from a_star import AstarPathFinging
+
+def get_maze_from_grid():
+    grid = hou.pwd().parm('grid_path').eval()
+    geo = hou.node(grid).geometry()
+
+    prims = geo.prims()
+    num_rows = num_columns = int(math.sqrt(len(prims)))
+                                 
+    grid_matrix = []
+
+
+    for row in range(num_rows):
+        new_row = []
+        for col in range(num_columns):
+            prim_index = row * num_columns + col
+            prim = geo.prim(prim_index)
+            color = prim.attribValue("Cd")
+            new_row.append(1 if color == (1, 1, 1) else 0)
+        grid_matrix.append(new_row)
+    print(grid_matrix)
+    
+    return grid_matrix
+
+def position_object(object_path, row, col, cell_size=1):
+    main_char = hou.node(object_path)
+    world_x = col * cell_size
+    world_z = row * cell_size
+
+
+    center = main_char.parmTuple("t").eval()
+    main_char.parmTuple("t").set([world_x, 0, world_z])
+    pos = (row, col)
+    return pos
+
+def solve_maze():
+    main_char_path = hou.pwd().parm('main_char').eval()
+    npc_count = hou.pwd().parm("npcs").eval()
+    npc_paths = {}
+  
+
+    target_pos = position_object(main_char_path, 6, 1)
+
+    maze = get_maze_from_grid()
+    print("")
+    for row in maze:
+        print(row)
+        
+    all_paths = {}
+        
+        
+    for i in range(1, npc_count+1):
+        npc_char_path = hou.pwd().parm(f"npc_{i}").eval().strip()
+        if not npc_char_path:
+            continue
+            
+        start_pos = position_object(npc_char_path, 0, (i-1))
+
+        pathFinder = AstarPathFinging(maze, start_pos, target_pos)
+
+        path = pathFinder.find_path()
+
+        if path:
+            print("Path found:", path)
+            all_paths[f"npc_{i}"] = path
+            
+        else:
+            print("No path found")
+            
+    print(all_paths)
+    
+
+
+    def export_paths(all_paths, filename=r"D:\ML\rebelway\houdini\A_star\pickle\paths.pkl"):
+        with open(filename, "wb") as f:
+            pickle.dump(all_paths, f)
+        print(f"paths saved in {filename}")
+    
+
+    export_paths(all_paths)
+
+        
+            
+            
+            
+
+            
+def export_path(npc_char_path, filename=r"D:\ML\rebelway\houdini\A_star\pickle\paths.pkl"):
+    with open(filename, "wb") as f:
+        pickle.dump(npc_char_path, f)
+        
+        
+        
+        
+
+        
+        
+
+
+    
+
+                
+                
+                
+
+
+
+
+
